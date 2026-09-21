@@ -1,0 +1,1570 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora de Rebalanceo de Cartera — Carlos Sauza (Mat. 1823)</title>
+<style>
+    :root {
+        --primary: #1a365d;
+        --accent: #2b6cb0;
+        --bg: #f0f4f8;
+        --card-bg: #ffffff;
+        --border: #cbd5e1;
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: var(--bg);
+        color: #333;
+        margin: 0;
+        padding: 20px;
+        zoom: 1.25;
+    }
+
+    .container {
+        max-width: 980px;
+        margin: 0 auto;
+        background: var(--card-bg);
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+
+    .header {
+        border-bottom: 2px solid #e2e8f0;
+        padding-bottom: 12px;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    .header h1 {
+        margin: 0;
+        font-size: 22px;
+        color: var(--primary);
+        text-transform: uppercase;
+    }
+
+    .advisor-info {
+        font-size: 13px;
+        font-weight: 600;
+        color: #64748b;
+        margin-top: 4px;
+    }
+
+    .advisor-bar {
+        background-color: #0f172a;
+        color: #ffffff;
+        padding: 6px 16px;
+        border-radius: 6px;
+        font-size: 12.5px;
+        text-align: center;
+        margin-bottom: 12px;
+    }
+    .advisor-bar a {
+        color: #7dd3fc;
+        text-decoration: underline;
+        font-weight: 600;
+    }
+    .disclaimer-text {
+        font-size: 11px;
+        color: #94a3b8;
+        text-align: center;
+        line-height: 1.6;
+        margin: 0 0 22px;
+    }
+
+    .intro {
+        font-size: 13.5px;
+        color: #475569;
+        margin: 0 0 20px;
+        line-height: 1.6;
+    }
+
+    .section-title {
+        font-size: 14px;
+        font-weight: bold;
+        color: var(--primary);
+        margin: 0 0 4px;
+    }
+
+    .section-sub {
+        font-size: 12.5px;
+        color: #64748b;
+        margin: 0 0 14px;
+    }
+
+    .panel {
+        background: #f8fafc;
+        padding: 18px;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        margin-bottom: 20px;
+    }
+
+    table { width: 100%; border-collapse: collapse; }
+
+    thead th {
+        background-color: var(--primary);
+        color: white;
+        font-size: 12px;
+        text-align: left;
+        padding: 9px 10px;
+    }
+    thead th.num { text-align: right; }
+
+    tbody td {
+        padding: 8px 10px;
+        border-bottom: 1px solid #e2e8f0;
+        font-size: 13.5px;
+        background-color: #fff;
+        vertical-align: middle;
+    }
+    tbody tr:last-child td { border-bottom: none; }
+
+    tr.group-header td {
+        background-color: #f8fafc;
+        color: #64748b;
+        font-weight: 700;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding-top: 10px;
+        padding-bottom: 10px;
+        border-top: 2px solid var(--primary);
+    }
+    tr.group-header td.num {
+        color: #1e293b;
+        font-weight: 700;
+        font-size: 13px;
+    }
+    tr.sub-header td {
+        background-color: #ffffff;
+        border-top: 1px solid #e2e8f0;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    tr.sub-header td:first-child {
+        padding-left: 14px;
+        font-weight: 700;
+        color: var(--primary);
+        border-left: 3px solid var(--accent);
+    }
+    tr.sub-header td.num {
+        font-weight: 700;
+        color: var(--primary);
+    }
+    tr.leaf-row td:first-child {
+        padding-left: 14px;
+        font-weight: 400;
+    }
+    tr.sub-row td:first-child {
+        padding-left: 28px;
+        font-weight: 400;
+        color: #334155;
+    }
+    td.num { text-align: right; font-weight: 600; color: #1e293b; }
+
+    .table-container {
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        overflow-x: auto;
+        margin-bottom: 12px;
+    }
+
+    input[type=number], input[type=text] {
+        padding: 7px 9px;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        font-size: 13.5px;
+        font-weight: 600;
+        color: #1e293b;
+        outline: none;
+        background-color: #fff;
+        width: 100%;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        text-align: right;
+    }
+    input:focus { border-color: var(--accent); }
+
+    /* Saca las flechas de incremento/decremento de los campos numéricos */
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+    input[type=number] {
+        -moz-appearance: textfield;
+        appearance: textfield;
+    }
+
+    .currency-badge {
+        display: inline-block;
+        font-size: 10.5px;
+        font-weight: 700;
+        padding: 1px 6px;
+        border-radius: 4px;
+        margin-left: 6px;
+        vertical-align: middle;
+    }
+    .currency-badge.ars { background-color: #eef2ff; color: #4338ca; }
+    .currency-badge.usd { background-color: #ecfdf5; color: #047857; }
+
+    .flag {
+        font-size: 12.5px;
+        padding: 8px 12px;
+        border-radius: 6px;
+        margin-bottom: 10px;
+        display: none;
+        font-weight: 600;
+    }
+    .flag.show { display: block; }
+    .flag.ok { background-color: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+    .flag.bad { background-color: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+    .flag.warn { background-color: #fefce8; color: #854d0e; border: 1px solid #fde68a; }
+
+    .row-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
+
+    button.action {
+        background-color: #2563eb;
+        color: white;
+        border: none;
+        padding: 9px 16px;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    button.action:hover { background-color: #1d4ed8; }
+
+    button.secondary {
+        background-color: #e2e8f0;
+        color: #0f172a;
+        border: none;
+        padding: 9px 16px;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    button.secondary:hover { background-color: #cbd5e1; }
+
+    button.dark {
+        background-color: #0f172a;
+        color: white;
+        border: none;
+        padding: 10px 18px;
+        border-radius: 6px;
+        font-size: 13.5px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    button.dark:hover { background-color: #1e293b; }
+
+    .inline-row {
+        display: flex;
+        align-items: flex-end;
+        gap: 14px;
+        flex-wrap: wrap;
+    }
+    .input-group {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+    .input-group label {
+        font-size: 12px;
+        font-weight: bold;
+        color: #475569;
+    }
+    .inline-row .input-group input { width: 200px; }
+
+    .result-empty { color: #94a3b8; font-size: 13px; padding: 4px 0; }
+
+    .badge {
+        display: inline-block;
+        font-size: 11px;
+        font-weight: 600;
+        padding: 2px 8px;
+        border-radius: 4px;
+        margin-top: 3px;
+    }
+    .badge.under { background-color: #ecfdf5; color: #047857; }
+    .badge.over { background-color: #fefce8; color: #854d0e; }
+
+    td.ticker { font-weight: bold; color: var(--accent); }
+
+    tfoot td {
+        font-weight: bold;
+        border-top: 2px solid #e2e8f0;
+        background-color: #f8fafc;
+    }
+
+    .footnote {
+        color: #94a3b8;
+        font-size: 11.5px;
+        margin-top: 16px;
+        line-height: 1.6;
+        text-align: center;
+    }
+
+    .hero-total {
+        display: flex;
+        align-items: stretch;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .hero-bar { width: 4px; background: var(--accent); flex-shrink: 0; }
+    .hero-split {
+        display: flex;
+        flex: 1;
+        gap: 24px;
+        flex-wrap: wrap;
+    }
+    .hero-content {
+        flex: 1.4;
+        min-width: 260px;
+        padding: 18px 22px;
+        text-align: center;
+    }
+    .hero-disponible {
+        flex: 1;
+        min-width: 200px;
+        padding: 18px 22px 18px 0;
+    }
+    @media (max-width: 640px) {
+        .hero-disponible { padding: 16px 4px 4px; }
+    }
+    .hero-label {
+        font-size: 12px;
+        color: #64748b;
+        letter-spacing: 0.06em;
+        font-weight: 700;
+        text-transform: uppercase;
+        margin-bottom: 6px;
+    }
+    .hero-label-row {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        margin-bottom: 6px;
+    }
+    .hero-label-row .hero-label { margin-bottom: 0; }
+    .hero-moneda-select {
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--primary);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 3px 6px;
+        background-color: #fff;
+        cursor: pointer;
+    }
+    .hero-value {
+        font-size: 34px;
+        font-weight: 700;
+        color: var(--primary);
+    }
+    .hero-rate-row {
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        gap: 14px;
+        flex-wrap: wrap;
+        margin-top: 14px;
+    }
+    .rate-field {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        text-align: left;
+    }
+    .rate-field label {
+        font-size: 11px;
+        font-weight: 700;
+        color: #64748b;
+    }
+    .rate-field input { width: 130px; }
+
+    .quick-cards {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+    }
+    .quick-card {
+        flex: 1;
+        min-width: 220px;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-left: 3px solid var(--primary);
+        border-radius: 8px;
+        padding: 12px 16px;
+    }
+    .quick-card-title {
+        font-size: 11px;
+        font-weight: 700;
+        color: #64748b;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        margin-bottom: 10px;
+    }
+    .quick-card-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 13px;
+        padding: 3px 0;
+        color: #64748b;
+    }
+    .quick-card-row b { color: #1e293b; font-weight: 700; }
+    .quick-card-input-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 4px 0;
+    }
+    .quick-card-input-row label {
+        font-size: 12.5px;
+        color: #64748b;
+        flex-shrink: 0;
+    }
+    .quick-card-input-row input { max-width: 130px; text-align: right; }
+
+    .instrumentos-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 4px 0;
+        border-bottom: 1px solid #eef2f7;
+        font-size: 11.5px;
+        gap: 8px;
+    }
+    .instrumentos-row:last-child { border-bottom: none; }
+    .instrumentos-total { border-top: 1px solid #cbd5e1; margin-top: 4px; padding-top: 8px; }
+    .instrumentos-total .instrumentos-name { font-weight: 700; color: #334155; }
+    .instrumentos-name { color: var(--accent); font-weight: 500; }
+    .instrumentos-cols { display: flex; gap: 8px; flex-shrink: 0; }
+    .instrumentos-pct { width: 56px; text-align: right; white-space: nowrap; }
+    .instrumentos-val { width: 110px; text-align: right; white-space: nowrap; }
+    .instrumentos-header { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.03em; color: #94a3b8; font-weight: 700; padding-bottom: 6px; border-bottom: 1px solid #e2e8f0; white-space: nowrap; }
+    .instrumentos-value { color: var(--primary); font-weight: 700; }
+
+    @media (max-width: 640px) {
+        .container { padding: 16px; }
+        .header h1 { font-size: 18px; }
+        table, thead, tbody { display: block; width: 100%; }
+        thead { display: none; }
+        tbody tr {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px 12px;
+            padding: 12px 10px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        tbody tr td { border-bottom: none; padding: 0; background: transparent; }
+        tbody tr td:first-child { grid-column: 1 / -1; }
+        .inline-row .input-group input { width: 100%; }
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <div class="advisor-bar">
+        🔒 Asesor: <b>Carlos Sauza</b> (Mat. CNV N° 1823) &nbsp;|&nbsp;
+        <a href="https://www.balanz.com/abrir-cuenta-2.aspx?reference=carlos.sauza.asesor@gmail.com" target="_blank" rel="noopener">Apretá aquí para abrir una cuenta en Balanz y recibir mi asesoramiento</a>
+    </div>
+
+    <div class="header">
+        <h1>Calculadora de Rebalanceo de Cartera</h1>
+    </div>
+
+    <div class="hero-total">
+        <div class="hero-bar"></div>
+        <div class="hero-split">
+            <div class="hero-content">
+                <div class="hero-label-row">
+                    <div class="hero-label">Total valorizado en</div>
+                    <select id="heroMoneda" class="hero-moneda-select">
+                        <option value="ARS">Pesos</option>
+                        <option value="USD">Dólares</option>
+                        <option value="USDCCL">US Dollar (Cable)</option>
+                    </select>
+                </div>
+                <div class="hero-value" id="heroTotal">$ 0,00</div>
+                <div class="hero-rate-row">
+                    <div class="rate-field">
+                        <label for="mepInput">Dólar MEP</label>
+                        <input type="number" id="mepInput" min="0" step="any" placeholder="0">
+                    </div>
+                    <div class="rate-field">
+                        <label for="cclInput">Dólar Cable (CCL)</label>
+                        <input type="number" id="cclInput" min="0" step="any" placeholder="0">
+                    </div>
+                    <button class="secondary" id="btnCotizacion">Actualizar (Dolar)</button>
+                </div>
+                <div class="flag" id="mepFlag" style="margin-top:10px; text-align:left;"></div>
+            </div>
+            <div class="hero-disponible">
+                <div class="quick-card-title">Disponible</div>
+                <div class="quick-card-input-row">
+                    <label for="saldoArs">Pesos</label>
+                    <input type="text" inputmode="decimal" id="saldoArs" placeholder="0">
+                </div>
+                <div class="quick-card-input-row">
+                    <label for="saldoUsd">Dólares</label>
+                    <input type="text" inputmode="decimal" id="saldoUsd" placeholder="0">
+                </div>
+                <div class="quick-card-input-row">
+                    <label for="saldoUsdCcl">US Dollar (Cable)</label>
+                    <input type="text" inputmode="decimal" id="saldoUsdCcl" placeholder="0">
+                </div>
+                <div class="row-actions" style="margin-top:12px;">
+                    <button class="secondary" id="btnGuardar">Guardar</button>
+                    <button class="secondary" id="btnReset">Reiniciar</button>
+                </div>
+                <div id="guardarMsg" style="font-size:11px; color:#059669; margin-top:6px; min-height:14px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="flag" id="saldoFlag" style="margin-bottom:20px;"></div>
+
+    <div class="quick-cards">
+        <div class="quick-card">
+            <div class="quick-card-title">Invertido</div>
+            <div id="instrumentosList"></div>
+        </div>
+        <div class="quick-card">
+            <div class="quick-card-title">Objetivo</div>
+            <div id="objetivoList"></div>
+            <div class="quick-card-row"><span>% objetivo</span><b id="qcLiquidezTarget">0%</b></div>
+            <div class="quick-card-row"><span>% actual</span><b id="qcLiquidezActual">0%</b></div>
+            <label style="display:flex; align-items:flex-start; gap:6px; margin-top:10px; font-size:11px; color:#64748b; cursor:pointer; line-height:1.4;">
+                <input type="checkbox" id="incluirSaldoObjetivo" checked style="width:14px; height:14px; cursor:pointer; flex-shrink:0; margin-top:1px;">
+                Incluir en el 100% (toma lo que le sobra a las demás)
+            </label>
+        </div>
+    </div>
+
+    <div class="panel">
+        <p class="section-title">Categorías de la cartera</p>
+        <p class="section-sub">Cargá el valor actual de cada categoría (en pesos) y el % objetivo. Los % objetivo deben sumar 100%. Las filas "Renta Variable", "Renta Fija" y "Bonos" muestran automáticamente la suma de lo que agrupan.</p>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Categoría</th>
+                        <th class="num">Valor actual</th>
+                        <th class="num">% actual</th>
+                        <th class="num">% objetivo</th>
+                        <th class="num">Valor objetivo</th>
+                    </tr>
+                </thead>
+                <tbody id="rows"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="panel">
+        <p class="section-title">FCI</p>
+        <p class="section-sub">FCI en dólares se carga en USD y se pesifica con el MEP para el total.</p>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Categoría</th>
+                        <th class="num">Valor actual</th>
+                        <th class="num">% actual</th>
+                        <th class="num">% objetivo</th>
+                        <th class="num">Valor objetivo</th>
+                    </tr>
+                </thead>
+                <tbody id="rowsFondos"></tbody>
+            </table>
+        </div>
+
+        <div class="flag" id="pctFlag" style="margin-top:14px;"></div>
+    </div>
+
+    <div class="panel">
+        <p class="section-title">Distribución de la cartera</p>
+        <p class="section-sub">Comparación entre cómo está compuesta hoy (incluyendo el saldo sin invertir) y el objetivo definido arriba.</p>
+        <div style="display:flex; gap:24px; flex-wrap:wrap; justify-content:center;">
+            <div style="flex:1; min-width:300px; max-width:520px;">
+                <p style="text-align:center; font-weight:700; color:var(--primary); font-size:13px; margin:0 0 8px;">Actual</p>
+                <div id="chartActual"></div>
+            </div>
+            <div style="flex:1; min-width:300px; max-width:520px;">
+                <p style="text-align:center; font-weight:700; color:var(--primary); font-size:13px; margin:0 0 8px;">Objetivo</p>
+                <div id="chartObjetivo"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel">
+        <p class="section-title">Nuevo aporte</p>
+        <p class="section-sub">Monto adicional que vas a ingresar ahora, en pesos y/o en dólares.</p>
+        <div class="inline-row">
+            <div class="input-group">
+                <label for="aportePesos">Aporte en pesos</label>
+                <input type="text" inputmode="decimal" id="aportePesos" placeholder="0">
+            </div>
+            <div class="input-group">
+                <label for="aporteUsd">Aporte en USD</label>
+                <input type="text" inputmode="decimal" id="aporteUsd" placeholder="0">
+            </div>
+            <button class="dark" id="calcBtn">Calcular distribución</button>
+        </div>
+
+        <div id="resultado" style="margin-top:18px;"></div>
+    </div>
+
+    <p class="footnote">
+        El total se consolida en pesos usando la cotización MEP cargada arriba. Los datos se guardan solo en este navegador.
+    </p>
+
+    <p class="disclaimer-text">
+        ⚠️ <b>Disclaimer:</b> Este dashboard es exclusivamente para fines educativos e informativos. No constituye asesoramiento financiero ni recomendación de inversión. Los datos pueden contener errores. Consultá a un asesor financiero certificado antes de tomar decisiones de inversión. Invertir conlleva riesgos, incluyendo la posible pérdida del capital invertido.<br>
+        🔒 Uso exclusivo para clientes del asesor Carlos Sauza (Mat. CNV N° 1823).
+    </p>
+</div>
+
+<script>
+(function(){
+    const STORAGE_KEY = 'aportes_categorias_v4';
+
+    // Orden: Renta Variable, Renta Fija (con Bonos agrupado), y Fondos aparte.
+    const CATEGORIAS = [
+        { key:'cedears',      name:'Cedears',              currency:'ARS' },
+        { key:'acciones',     name:'Acciones Argentinas',  currency:'ARS' },
+        { key:'bonos_ars',    name:'Bonos en pesos',       currency:'ARS' },
+        { key:'bonos_usd',    name:'Bonos dolarizados',    currency:'ARS' },
+        { key:'corporativos', name:'Corporativo (Oblig. Neg.)',         currency:'ARS' },
+        { key:'letras',       name:'Letras',               currency:'ARS' },
+        { key:'fondos_ars',   name:'FCI en pesos',      currency:'ARS' },
+        { key:'fondos_usd',   name:'FCI en dólares',    currency:'USD' }
+    ];
+
+    const FONDOS_KEYS = ['fondos_ars','fondos_usd'];
+    const PRINCIPALES_KEYS = CATEGORIAS.map(c=>c.key).filter(k=>!FONDOS_KEYS.includes(k));
+
+    let state = {};
+    let mep = 0;
+
+    const rowsEl = document.getElementById('rows');
+    const rowsFondosEl = document.getElementById('rowsFondos');
+    const pctFlag = document.getElementById('pctFlag');
+    const saldoFlag = document.getElementById('saldoFlag');
+    const mepFlag = document.getElementById('mepFlag');
+    const mepInput = document.getElementById('mepInput');
+    const cclInput = document.getElementById('cclInput');
+    const saldoArsInput = document.getElementById('saldoArs');
+    const saldoUsdInput = document.getElementById('saldoUsd');
+    const saldoUsdCclInput = document.getElementById('saldoUsdCcl');
+    const incluirSaldoObjetivo = document.getElementById('incluirSaldoObjetivo');
+
+    // Objetivo de liquidez: si está tildado, es lo que le sobra a las demás categorías
+    // para llegar a 100% (nunca negativo); si no, la liquidez no tiene objetivo propio.
+    function getSaldoTargetPct(){
+        if(!incluirSaldoObjetivo.checked) return 0;
+        const sumCategorias = CATEGORIAS.reduce((s,c)=> s + (parseFloat(state[c.key].target)||0), 0);
+        return Math.max(0, 100 - sumCategorias);
+    }
+    const resultado = document.getElementById('resultado');
+
+    let ccl = 0;
+
+    const COLOR_MAP = {
+        cedears: '#2563eb',
+        acciones: '#0ea5e9',
+        bonos_ars: '#f59e0b',
+        bonos_usd: '#f97316',
+        corporativos: '#10b981',
+        letras: '#84cc16',
+        fondos_ars: '#8b5cf6',
+        fondos_usd: '#ec4899',
+        saldo: '#94a3b8'
+    };
+
+    function defaultState(){
+        const obj = { mep:'', ccl:'', saldoArs:'', saldoUsd:'', saldoUsdCcl:'', saldoTarget:'' };
+        CATEGORIAS.forEach(c=>{ obj[c.key] = { valor:'', target:'' }; });
+        return obj;
+    }
+
+    function load(){
+        try{
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if(raw){
+                const parsed = JSON.parse(raw);
+                if(parsed && typeof parsed === 'object') return parsed;
+            }
+        }catch(e){}
+        return null;
+    }
+
+    function save(){
+        try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+    }
+
+    function exampleState(){
+        return {
+            mep: 1537.27,
+            ccl: 1595.89,
+            saldoArs: 186248,
+            saldoUsd: 1.76,
+            saldoUsdCcl: 2.09,
+            saldoTarget: 5,
+            cedears:      { valor: 8706670, target: 30 },
+            acciones:     { valor: 0,       target: 5  },
+            bonos_ars:    { valor: 849563,  target: 5  },
+            bonos_usd:    { valor: 1987088, target: 10 },
+            corporativos: { valor: 1709800, target: 10 },
+            letras:       { valor: 863210,  target: 5  },
+            fondos_ars:   { valor: 0,       target: 15 },
+            fondos_usd:   { valor: 5277,    target: 15 }
+        };
+    }
+
+    function valorEnArs(cat, valor){
+        const n = parseFloat(valor) || 0;
+        if(cat.currency === 'USD') return n * (mep || 0);
+        return n;
+    }
+
+    // Suma de todas las categorías invertidas (sin contar el saldo líquido).
+    function getValorCategoriasArs(){
+        return CATEGORIAS.reduce((sum,c)=> sum + valorEnArs(c, state[c.key] ? state[c.key].valor : 0), 0);
+    }
+
+    // Saldo disponible (sin invertir), consolidado en pesos.
+    // El USD normal se pesifica con MEP, y el USD Cable con CCL.
+    function getSaldoActualArs(){
+        const a = parseNum(saldoArsInput.value);
+        const u = parseNum(saldoUsdInput.value);
+        const uCcl = parseNum(saldoUsdCclInput.value);
+        return a + u * (mep || 0) + uCcl * (ccl || 0);
+    }
+
+    // Patrimonio total = categorías invertidas + saldo sin invertir.
+    // Este es el denominador correcto para el "% actual" de cada categoría.
+    function getPatrimonioActualArs(){
+        return getValorCategoriasArs() + getSaldoActualArs();
+    }
+
+    function sumaGrupoArs(keys){
+        return keys.reduce((sum,k)=>{
+            const c = CATEGORIAS.find(x=>x.key===k);
+            const s = state[k] || { valor:'' };
+            return sum + valorEnArs(c, s.valor);
+        }, 0);
+    }
+
+    function sumaGrupoTarget(keys){
+        return keys.reduce((sum,k)=> sum + (parseFloat(state[k] ? state[k].target : 0)||0), 0);
+    }
+
+    function crearFilaHeader(id, label, className){
+        const tr = document.createElement('tr');
+        tr.className = className;
+        tr.innerHTML =
+            '<td>'+label+'</td>' +
+            '<td class="num" id="'+id+'Valor">—</td>' +
+            '<td class="num" id="'+id+'PctActual">—</td>' +
+            '<td class="num" id="'+id+'PctTarget">—</td>' +
+            '<td class="num" id="'+id+'ValorTarget">—</td>';
+        return tr;
+    }
+
+    function crearFilaLeaf(c, indentClass){
+        const tr = document.createElement('tr');
+        if(indentClass) tr.className = indentClass;
+        const s = state[c.key] || { valor:'', target:'' };
+
+        const tdName = document.createElement('td');
+        tdName.innerHTML = c.name + '<span class="currency-badge ' + (c.currency==='USD'?'usd':'ars') + '">' + c.currency + '</span>';
+
+        const tdValor = document.createElement('td');
+        tdValor.className = 'num';
+        const inValor = document.createElement('input');
+        inValor.type = 'text'; inValor.inputMode = 'decimal'; inValor.placeholder = '0';
+        inValor.value = formatNum(parseNum(s.valor));
+        attachMoneyInput(inValor, (n)=>{
+            state[c.key].valor = n;
+            renderPctActual();
+            save();
+        });
+        tdValor.appendChild(inValor);
+
+        const tdPctActual = document.createElement('td');
+        tdPctActual.className = 'num pct-actual';
+        tdPctActual.dataset.key = c.key;
+
+        const tdTarget = document.createElement('td');
+        tdTarget.className = 'num';
+        const inTarget = document.createElement('input');
+        inTarget.type = 'number'; inTarget.min = '0'; inTarget.max = '100'; inTarget.step = 'any'; inTarget.placeholder = '0';
+        inTarget.value = s.target;
+        inTarget.addEventListener('input', ()=>{
+            state[c.key].target = inTarget.value;
+            checkPctFlag();
+            save();
+        });
+        tdTarget.appendChild(inTarget);
+
+        const tdValorTarget = document.createElement('td');
+        tdValorTarget.className = 'num valor-objetivo';
+        tdValorTarget.dataset.key = c.key;
+        tdValorTarget.dataset.currency = c.currency;
+
+        tr.appendChild(tdName);
+        tr.appendChild(tdValor);
+        tr.appendChild(tdPctActual);
+        tr.appendChild(tdTarget);
+        tr.appendChild(tdValorTarget);
+        return tr;
+    }
+
+    function renderRows(){
+        rowsEl.innerHTML = '';
+        rowsFondosEl.innerHTML = '';
+
+        const cedears = CATEGORIAS.find(c=>c.key==='cedears');
+        const acciones = CATEGORIAS.find(c=>c.key==='acciones');
+        const bonosArsCat = CATEGORIAS.find(c=>c.key==='bonos_ars');
+        const bonosUsdCat = CATEGORIAS.find(c=>c.key==='bonos_usd');
+        const corporativos = CATEGORIAS.find(c=>c.key==='corporativos');
+        const letras = CATEGORIAS.find(c=>c.key==='letras');
+        const fondosArs = CATEGORIAS.find(c=>c.key==='fondos_ars');
+        const fondosUsd = CATEGORIAS.find(c=>c.key==='fondos_usd');
+
+        // Renta Variable
+        rowsEl.appendChild(crearFilaHeader('rv', 'Renta Variable', 'group-header'));
+        rowsEl.appendChild(crearFilaLeaf(cedears, 'leaf-row'));
+        rowsEl.appendChild(crearFilaLeaf(acciones, 'leaf-row'));
+
+        // Renta Fija (con Bonos agrupado adentro)
+        const trSpacer = document.createElement('tr');
+        trSpacer.innerHTML = '<td colspan="4" style="height:14px;padding:0;border:none;background:transparent;"></td>';
+        rowsEl.appendChild(trSpacer);
+        rowsEl.appendChild(crearFilaHeader('rf', 'Renta Fija', 'group-header'));
+        rowsEl.appendChild(crearFilaHeader('bonos', 'Bonos', 'sub-header'));
+        rowsEl.appendChild(crearFilaLeaf(bonosArsCat, 'sub-row'));
+        rowsEl.appendChild(crearFilaLeaf(bonosUsdCat, 'sub-row'));
+        rowsEl.appendChild(crearFilaLeaf(corporativos, 'leaf-row'));
+        rowsEl.appendChild(crearFilaLeaf(letras, 'leaf-row'));
+
+        // Fondos (tabla aparte, con su propia barra de total)
+        rowsFondosEl.appendChild(crearFilaHeader('fondos', 'FCI', 'group-header'));
+        rowsFondosEl.appendChild(crearFilaLeaf(fondosArs, 'leaf-row'));
+        rowsFondosEl.appendChild(crearFilaLeaf(fondosUsd, 'leaf-row'));
+
+        checkPctFlag();
+        renderPctActual();
+    }
+
+    function updateGroupHeaders(totalArs){
+        const grupos = [
+            { id:'rv', keys:['cedears','acciones'] },
+            { id:'rf', keys:['bonos_ars','bonos_usd','corporativos','letras'] },
+            { id:'bonos', keys:['bonos_ars','bonos_usd'] },
+            { id:'fondos', keys:['fondos_ars','fondos_usd'] }
+        ];
+        grupos.forEach(g=>{
+            const valor = sumaGrupoArs(g.keys);
+            const target = sumaGrupoTarget(g.keys);
+            const elValor = document.getElementById(g.id+'Valor');
+            const elPctActual = document.getElementById(g.id+'PctActual');
+            const elPctTarget = document.getElementById(g.id+'PctTarget');
+            const elValorTarget = document.getElementById(g.id+'ValorTarget');
+            if(elValor) elValor.textContent = '$ ' + fmtMoney(valor);
+            if(elPctActual) elPctActual.textContent = totalArs > 0 ? ((valor/totalArs)*100).toFixed(1) + '%' : '—';
+            if(elPctTarget) elPctTarget.textContent = target.toFixed(1) + '%';
+            if(elValorTarget) elValorTarget.textContent = '$ ' + fmtMoney(target/100 * totalArs);
+        });
+    }
+
+    function updateValorObjetivo(totalArs){
+        document.querySelectorAll('.valor-objetivo').forEach(td=>{
+            const key = td.dataset.key;
+            const c = CATEGORIAS.find(x=>x.key===key);
+            const target = parseFloat(state[key].target) || 0;
+            const valorArs = target/100 * totalArs;
+            if(td.dataset.currency === 'USD'){
+                td.textContent = mep > 0 ? 'u$s ' + fmtMoney(valorArs/mep) : '—';
+            } else {
+                td.textContent = '$ ' + fmtMoney(valorArs);
+            }
+        });
+    }
+
+    function updateSaldoFlag(totalArs){
+        const saldo = getSaldoActualArs();
+        const target = getSaldoTargetPct();
+        saldoFlag.classList.add('show');
+        if(totalArs > 0){
+            const pct = (saldo/totalArs)*100;
+            const diff = pct - target;
+            saldoFlag.className = 'flag show ok';
+            saldoFlag.textContent = 'El saldo sin invertir representa el ' + pct.toFixed(1) + '% de tu patrimonio total (objetivo: ' + target.toFixed(1) + '%).';
+            if(Math.abs(diff) > 0.5){
+                saldoFlag.textContent += diff > 0
+                    ? ' Tenés más liquidez de la objetivo — al calcular un aporte, el excedente se suma a lo que hay para invertir.'
+                    : ' Tenés menos liquidez de la objetivo — al calcular un aporte, se va a reservar parte para llegar al % de liquidez buscado.';
+            }
+        } else {
+            saldoFlag.classList.remove('show');
+        }
+    }
+
+    function initCharts(){
+        // No requiere librerías externas: se dibuja con SVG nativo.
+    }
+
+    function dibujarDonut(containerId, labels, data, colors, montos){
+        const el = document.getElementById(containerId);
+        if(!el) return;
+
+        const total = data.reduce((a,b)=>a+b, 0);
+        if(total <= 0){
+            el.innerHTML = '<p class="result-empty" style="text-align:center;">Cargá valores para ver el gráfico.</p>';
+            return;
+        }
+
+        const width = 820, height = 420;
+        const cx = width/2, cy = height/2;
+        const radius = 112, strokeWidth = 44;
+        const ringOuter = radius + strokeWidth/2;
+        const ringInner = radius - strokeWidth/2;
+        const elbowR = ringOuter + 18;
+        const labelOffsetX = elbowR + 35;
+        const minY = 30, maxY = height - 30;
+        const explodeDist = 16;
+
+        function polar(r, angleDeg){
+            const rad = angleDeg * Math.PI/180;
+            return { x: cx + r*Math.sin(rad), y: cy - r*Math.cos(rad) };
+        }
+        function dirVector(angleDeg){
+            const rad = angleDeg * Math.PI/180;
+            return { dx: Math.sin(rad), dy: -Math.cos(rad) };
+        }
+
+        // Gajos del anillo, como porciones (path) en vez de arcos de stroke,
+        // para poder "explotarlos" hacia afuera al tocarlos.
+        let wedges = '';
+        const slices = [];
+        let acumuladoDeg = 0;
+
+        data.forEach((val, i)=>{
+            const fraccion = val / total;
+            let startDeg = 360 * acumuladoDeg;
+            let endDeg = 360 * (acumuladoDeg + fraccion);
+            if(endDeg - startDeg >= 359.9) endDeg = startDeg + 359.9; // evita el arco degenerado de 360°
+            const midDeg = (startDeg + endDeg) / 2;
+            acumuladoDeg += fraccion;
+
+            const largeArc = (endDeg - startDeg) > 180 ? 1 : 0;
+            const p1 = polar(ringOuter, startDeg);
+            const p2 = polar(ringOuter, endDeg);
+            const p3 = polar(ringInner, endDeg);
+            const p4 = polar(ringInner, startDeg);
+            const d = 'M '+p1.x.toFixed(1)+' '+p1.y.toFixed(1)+
+                ' A '+ringOuter+' '+ringOuter+' 0 '+largeArc+' 1 '+p2.x.toFixed(1)+' '+p2.y.toFixed(1)+
+                ' L '+p3.x.toFixed(1)+' '+p3.y.toFixed(1)+
+                ' A '+ringInner+' '+ringInner+' 0 '+largeArc+' 0 '+p4.x.toFixed(1)+' '+p4.y.toFixed(1)+' Z';
+
+            wedges += '<path class="slice-wedge" data-idx="'+i+'" d="'+d+'" fill="'+colors[i]+
+                '" style="cursor:pointer; transition: transform 0.15s ease;"></path>';
+
+            const edge = polar(ringOuter, midDeg);
+            const elbow = polar(elbowR, midDeg);
+            const lado = Math.sin(midDeg*Math.PI/180) >= 0 ? 'right' : 'left';
+            slices.push({ label: labels[i], value: val, monto: (montos && montos[i]) || '', color: colors[i], edge, elbow, lado, midDeg });
+        });
+
+        // Evita que las etiquetas de un mismo lado se pisen verticalmente, y las mantiene dentro del cuadro
+        ['left','right'].forEach(lado=>{
+            const items = slices.filter(s=>s.lado===lado).sort((a,b)=> a.elbow.y - b.elbow.y);
+            const minGap = 26;
+            for(let i=1;i<items.length;i++){
+                if(items[i].elbow.y - items[i-1].elbow.y < minGap){
+                    items[i].elbow.y = items[i-1].elbow.y + minGap;
+                }
+            }
+            if(items.length){
+                const first = items[0].elbow.y, last = items[items.length-1].elbow.y;
+                let shift = 0;
+                if(last > maxY) shift = maxY - last;
+                if(first + shift < minY) shift = minY - first;
+                items.forEach(it=> it.elbow.y += shift);
+            }
+        });
+
+        let extras = '';
+        slices.forEach(s=>{
+            const anchorX = s.lado === 'right' ? cx + labelOffsetX : cx - labelOffsetX;
+            const anchorY = s.elbow.y;
+            const textAnchor = s.lado === 'right' ? 'start' : 'end';
+            const textX = s.lado === 'right' ? anchorX + 6 : anchorX - 6;
+
+            extras += '<path d="M '+s.edge.x.toFixed(1)+' '+s.edge.y.toFixed(1)+
+                ' L '+s.elbow.x.toFixed(1)+' '+anchorY.toFixed(1)+
+                ' L '+anchorX.toFixed(1)+' '+anchorY.toFixed(1)+
+                '" fill="none" stroke="#94a3b8" stroke-width="1"></path>';
+            extras += '<circle cx="'+s.edge.x.toFixed(1)+'" cy="'+s.edge.y.toFixed(1)+'" r="2.5" fill="'+s.color+'"></circle>';
+            extras += '<text x="'+textX.toFixed(1)+'" y="'+anchorY.toFixed(1)+'" text-anchor="'+textAnchor+
+                '" dominant-baseline="middle" font-size="14" font-family="Segoe UI, Tahoma, Verdana, sans-serif" fill="#334155">'+
+                s.label+': <tspan font-weight="700">'+s.value.toFixed(2)+'%</tspan></text>';
+        });
+
+        const svg = '<svg viewBox="0 0 '+width+' '+height+'" style="width:100%; max-width:560px; height:auto; display:block; margin:0 auto; overflow:visible;">'+
+            wedges + extras + '<g id="'+containerId+'_bubble" style="display:none; pointer-events:none;"></g></svg>';
+
+        el.innerHTML = svg;
+
+        // Interacción: tocar un gajo lo separa un poco del centro y muestra el monto en una burbuja.
+        const svgEl = el.querySelector('svg');
+        const bubbleGroup = el.querySelector('#'+containerId+'_bubble');
+        let activo = null;
+
+        function ocultarBurbuja(){
+            if(activo) activo.setAttribute('transform', 'translate(0,0)');
+            activo = null;
+            bubbleGroup.style.display = 'none';
+            bubbleGroup.innerHTML = '';
+        }
+
+        svgEl.querySelectorAll('.slice-wedge').forEach(path=>{
+            path.addEventListener('click', function(e){
+                e.stopPropagation();
+                const idx = parseInt(path.dataset.idx, 10);
+                const s = slices[idx];
+
+                if(activo === path){ ocultarBurbuja(); return; }
+                if(activo) activo.setAttribute('transform', 'translate(0,0)');
+
+                const dir = dirVector(s.midDeg);
+                const dx = dir.dx * explodeDist, dy = dir.dy * explodeDist;
+                path.setAttribute('transform', 'translate('+dx.toFixed(1)+','+dy.toFixed(1)+')');
+                activo = path;
+
+                const bubbleCenter = polar(radius + explodeDist, s.midDeg);
+                const texto = s.monto || (s.value.toFixed(2)+'%');
+                const anchoTexto = Math.max(70, texto.length * 8 + 20);
+                const bx = bubbleCenter.x, by = bubbleCenter.y;
+
+                bubbleGroup.innerHTML =
+                    '<rect x="'+(bx-anchoTexto/2).toFixed(1)+'" y="'+(by-16).toFixed(1)+'" width="'+anchoTexto+'" height="32" rx="16" '+
+                    'fill="#ffffff" stroke="'+s.color+'" stroke-width="2"></rect>'+
+                    '<text x="'+bx.toFixed(1)+'" y="'+(by+1).toFixed(1)+'" text-anchor="middle" dominant-baseline="middle" '+
+                    'font-size="14" font-weight="700" font-family="Segoe UI, Tahoma, Verdana, sans-serif" fill="#1e293b">'+texto+'</text>';
+                bubbleGroup.style.display = '';
+            });
+        });
+
+        svgEl.addEventListener('click', ocultarBurbuja);
+    }
+
+    function updateCharts(){
+        const totalArs = getPatrimonioActualArs();
+
+        function montoTexto(valorArs, esUsd){
+            if(esUsd) return mep > 0 ? 'u$s ' + fmtMoney(valorArs/mep) : '—';
+            return '$ ' + fmtMoney(valorArs);
+        }
+
+        const labelsActual = [], dataActual = [], colorsActual = [], montosActual = [];
+        CATEGORIAS.forEach(c=>{
+            const valorArs = valorEnArs(c, state[c.key] ? state[c.key].valor : 0);
+            const pct = totalArs > 0 ? (valorArs/totalArs)*100 : 0;
+            if(pct > 0.05){
+                labelsActual.push(c.name);
+                dataActual.push(pct);
+                colorsActual.push(COLOR_MAP[c.key] || '#cbd5e1');
+                montosActual.push(montoTexto(valorArs, c.currency==='USD'));
+            }
+        });
+        const saldoActualArsVal = getSaldoActualArs();
+        const saldoPct = totalArs > 0 ? (saldoActualArsVal/totalArs)*100 : 0;
+        if(saldoPct > 0.05){
+            labelsActual.push('Saldo sin invertir');
+            dataActual.push(saldoPct);
+            colorsActual.push(COLOR_MAP.saldo);
+            montosActual.push(montoTexto(saldoActualArsVal, false));
+        }
+
+        const labelsObjetivo = [], dataObjetivo = [], colorsObjetivo = [], montosObjetivo = [];
+        CATEGORIAS.forEach(c=>{
+            const t = parseFloat(state[c.key] ? state[c.key].target : 0) || 0;
+            if(t > 0.05){
+                labelsObjetivo.push(c.name);
+                dataObjetivo.push(t);
+                colorsObjetivo.push(COLOR_MAP[c.key] || '#cbd5e1');
+                montosObjetivo.push(montoTexto(t/100*totalArs, c.currency==='USD'));
+            }
+        });
+        const targetSaldo = getSaldoTargetPct();
+        if(targetSaldo > 0.05){
+            labelsObjetivo.push('Liquidez');
+            dataObjetivo.push(targetSaldo);
+            colorsObjetivo.push(COLOR_MAP.saldo);
+            montosObjetivo.push(montoTexto(targetSaldo/100*totalArs, false));
+        }
+
+        dibujarDonut('chartActual', labelsActual, dataActual, colorsActual, montosActual);
+        dibujarDonut('chartObjetivo', labelsObjetivo, dataObjetivo, colorsObjetivo, montosObjetivo);
+    }
+
+    function updateHero(totalArs){
+        const heroTotal = document.getElementById('heroTotal');
+        const heroMoneda = document.getElementById('heroMoneda');
+        if(heroTotal){
+            const moneda = heroMoneda ? heroMoneda.value : 'ARS';
+            if(moneda === 'USD' && mep > 0){
+                heroTotal.textContent = 'u$s ' + fmtMoney(totalArs/mep);
+            } else if(moneda === 'USDCCL' && ccl > 0){
+                heroTotal.textContent = 'usd ' + fmtMoney(totalArs/ccl);
+            } else {
+                heroTotal.textContent = '$ ' + fmtMoney(totalArs);
+            }
+        }
+
+        const qcLiquidezTarget = document.getElementById('qcLiquidezTarget');
+        const qcLiquidezActual = document.getElementById('qcLiquidezActual');
+        if(qcLiquidezTarget) qcLiquidezTarget.textContent = getSaldoTargetPct().toFixed(1) + '%';
+        if(qcLiquidezActual) qcLiquidezActual.textContent = totalArs > 0 ? ((getSaldoActualArs()/totalArs)*100).toFixed(1) + '%' : '—';
+
+        updateInstrumentos(totalArs);
+        updateObjetivo(totalArs);
+    }
+
+    function gruposInstrumentos(){
+        return [
+            { key:'cedears', nombre:'Cedears', currency:'ARS' },
+            { key:'acciones', nombre:'Acciones Argentinas', currency:'ARS' },
+            { key:'bonos', nombre:'Bonos', currency:'ARS' },
+            { key:'corporativos', nombre:'Corporativo (Oblig. Neg.)', currency:'ARS' },
+            { key:'letras', nombre:'Letras', currency:'ARS' },
+            { key:'fci_ars', nombre:'FCI en pesos', currency:'ARS' },
+            { key:'fci_usd', nombre:'FCI en dólares', currency:'USD' }
+        ];
+    }
+
+    function valorActualGrupo(key){
+        if(key==='bonos') return sumaGrupoArs(['bonos_ars','bonos_usd']);
+        if(key==='fci_ars'){ const c = CATEGORIAS.find(x=>x.key==='fondos_ars'); return valorEnArs(c, state.fondos_ars.valor); }
+        if(key==='fci_usd'){ const c = CATEGORIAS.find(x=>x.key==='fondos_usd'); return valorEnArs(c, state.fondos_usd.valor); }
+        const c = CATEGORIAS.find(x=>x.key===key);
+        return valorEnArs(c, state[key].valor);
+    }
+
+    function targetGrupo(key){
+        if(key==='bonos') return sumaGrupoTarget(['bonos_ars','bonos_usd']);
+        if(key==='fci_ars') return parseFloat(state.fondos_ars.target) || 0;
+        if(key==='fci_usd') return parseFloat(state.fondos_usd.target) || 0;
+        return parseFloat(state[key].target) || 0;
+    }
+
+    function updateInstrumentos(totalArs){
+        const el = document.getElementById('instrumentosList');
+        if(!el) return;
+
+        const grupos = gruposInstrumentos()
+            .map(g=> ({ nombre:g.nombre, currency:g.currency, valor: valorActualGrupo(g.key) }))
+            .sort((a,b)=> a.nombre.localeCompare(b.nombre));
+
+        let html = '<div class="instrumentos-row instrumentos-header"><span></span><div class="instrumentos-cols"><span class="instrumentos-pct">% Actual</span><span class="instrumentos-val">Valor Actual</span></div></div>';
+
+        if(!grupos.length){
+            html += '<p class="result-empty">Cargá valores en las categorías para ver el detalle.</p>';
+        } else {
+            html += grupos.map(g=>{
+                const pct = totalArs > 0 ? ((g.valor/totalArs)*100).toFixed(1) + '%' : '—';
+                const valTxt = g.currency === 'USD'
+                    ? (mep > 0 ? 'u$s ' + fmtMoney(g.valor/mep) : '—')
+                    : '$ ' + fmtMoney(g.valor);
+                return '<div class="instrumentos-row"><span class="instrumentos-name">'+g.nombre+'</span>'+
+                    '<div class="instrumentos-cols"><span class="instrumentos-pct">'+pct+'</span><span class="instrumentos-val">'+valTxt+'</span></div></div>';
+            }).join('');
+        }
+
+        const valorCategorias = getValorCategoriasArs();
+        const pctCategorias = totalArs > 0 ? ((valorCategorias/totalArs)*100).toFixed(1) + '%' : '—';
+        html += '<div class="instrumentos-row instrumentos-total"><span class="instrumentos-name">Total categorías</span>'+
+            '<div class="instrumentos-cols"><span class="instrumentos-pct">'+pctCategorias+'</span><span class="instrumentos-val">$ '+fmtMoney(valorCategorias)+'</span></div></div>';
+
+        el.innerHTML = html;
+    }
+
+    function updateObjetivo(totalArs){
+        const el = document.getElementById('objetivoList');
+        if(!el) return;
+
+        const grupos = gruposInstrumentos()
+            .map(g=> ({ nombre:g.nombre, currency:g.currency, target: targetGrupo(g.key) }))
+            .sort((a,b)=> a.nombre.localeCompare(b.nombre));
+
+        let html = '<div class="instrumentos-row instrumentos-header"><span></span><div class="instrumentos-cols"><span class="instrumentos-pct">% Obj.</span><span class="instrumentos-val">Valor Obj.</span></div></div>';
+
+        if(!grupos.length){
+            html += '<p class="result-empty">Cargá % objetivo en las categorías para ver el detalle.</p>';
+        } else {
+            html += grupos.map(g=>{
+                const valorObjetivoArs = g.target/100 * totalArs;
+                const valTxt = g.currency === 'USD'
+                    ? (mep > 0 ? 'u$s ' + fmtMoney(valorObjetivoArs/mep) : '—')
+                    : '$ ' + fmtMoney(valorObjetivoArs);
+                return '<div class="instrumentos-row"><span class="instrumentos-name">'+g.nombre+'</span>'+
+                    '<div class="instrumentos-cols"><span class="instrumentos-pct">'+g.target.toFixed(1)+'%</span><span class="instrumentos-val">'+valTxt+'</span></div></div>';
+            }).join('');
+        }
+
+        el.innerHTML = html;
+    }
+
+    function renderPctActual(){
+        const totalArs = getPatrimonioActualArs();
+        document.querySelectorAll('.pct-actual').forEach(td=>{
+            const key = td.dataset.key;
+            const c = CATEGORIAS.find(x=>x.key===key);
+            const s = state[key];
+            const valorArs = valorEnArs(c, s.valor);
+            td.textContent = totalArs > 0 ? ((valorArs/totalArs)*100).toFixed(1) + '%' : '—';
+        });
+        updateGroupHeaders(totalArs);
+        updateValorObjetivo(totalArs);
+        updateSaldoFlag(totalArs);
+        updateCharts();
+        updateHero(totalArs);
+    }
+
+    function checkPctFlag(){
+        const sumCategorias = CATEGORIAS.reduce((s,c)=> s + (parseFloat(state[c.key].target)||0), 0);
+        const saldoTargetPct = getSaldoTargetPct();
+        pctFlag.classList.add('show');
+
+        if(incluirSaldoObjetivo.checked){
+            if(sumCategorias > 100.05){
+                pctFlag.className = 'flag show bad';
+                pctFlag.textContent = 'Las categorías ya suman ' + sumCategorias.toFixed(1) + '% sin contar la liquidez. Deberían sumar 100% o menos.';
+            } else {
+                pctFlag.className = 'flag show ok';
+                pctFlag.textContent = 'Categorías: ' + sumCategorias.toFixed(1) + '%. Liquidez objetivo: ' + saldoTargetPct.toFixed(1) + '% (calculada automáticamente). Total: 100%.';
+            }
+        } else {
+            const sumTarget = sumCategorias;
+            if(Math.abs(sumTarget-100) < 0.05){
+                pctFlag.className = 'flag show ok';
+                pctFlag.textContent = 'Los % objetivo suman 100%.';
+            } else {
+                pctFlag.className = 'flag show bad';
+                pctFlag.textContent = 'Los % objetivo suman ' + sumTarget.toFixed(1) + '%. Deberían sumar 100%.';
+            }
+        }
+
+        updateGroupHeaders(getPatrimonioActualArs());
+        updateValorObjetivo(getPatrimonioActualArs());
+        updateCharts();
+        updateHero(getPatrimonioActualArs());
+    }
+
+    function fmtMoney(n){
+        return n.toLocaleString('es-AR', { minimumFractionDigits:2, maximumFractionDigits:2 });
+    }
+
+    // Convierte "1.234.567,89" (formato es-AR) a número. También acepta texto plano sin separadores.
+    // Interpreta números escritos en distintos formatos:
+    // - "850.875,32" (es-AR: punto miles, coma decimal)
+    // - "850,875.32" (en-US: coma miles, punto decimal)
+    // - "850875.32" o "850875,32" (un solo separador con 1-2 dígitos después: se toma como decimal)
+    // - "850.875" o "850,875" (un solo separador con 3+ dígitos después: se toma como miles)
+    function parseNum(str){
+        if(typeof str !== 'string') return parseFloat(str) || 0;
+        let s = str.trim();
+        if(!s) return 0;
+
+        const hasComma = s.indexOf(',') !== -1;
+        const hasDot = s.indexOf('.') !== -1;
+
+        if(hasComma && hasDot){
+            if(s.lastIndexOf(',') > s.lastIndexOf('.')){
+                s = s.replace(/\./g, '').replace(',', '.');
+            } else {
+                s = s.replace(/,/g, '');
+            }
+        } else if(hasComma){
+            const partes = s.split(',');
+            const ultima = partes[partes.length-1];
+            s = (partes.length === 2 && ultima.length <= 2) ? s.replace(',', '.') : s.replace(/,/g, '');
+        } else if(hasDot){
+            const partes = s.split('.');
+            const ultima = partes[partes.length-1];
+            if(!(partes.length === 2 && ultima.length <= 2)){
+                s = s.replace(/\./g, '');
+            }
+        }
+
+        const n = parseFloat(s);
+        return isNaN(n) ? 0 : n;
+    }
+
+    // Formatea para mostrar mientras no se está editando el campo (con separador de miles).
+    function formatNum(n){
+        if(!n) return '';
+        return n.toLocaleString('es-AR', { minimumFractionDigits:2, maximumFractionDigits:2 });
+    }
+
+    // Un input de texto que muestra el número con separador de miles al perder el foco,
+    // y en formato simple (sin separadores) mientras se está editando.
+    function attachMoneyInput(inputEl, onChange){
+        inputEl.addEventListener('focus', ()=>{
+            const n = parseNum(inputEl.value);
+            inputEl.value = n ? String(n).replace('.', ',') : '';
+        });
+        inputEl.addEventListener('input', ()=>{
+            onChange(parseNum(inputEl.value));
+        });
+        inputEl.addEventListener('blur', ()=>{
+            const n = parseNum(inputEl.value);
+            inputEl.value = formatNum(n);
+        });
+    }
+
+    async function actualizarCotizacion(){
+        mepFlag.className = 'flag show warn';
+        mepFlag.textContent = 'Consultando DolarAPI...';
+        try{
+            const [respMep, respCcl] = await Promise.all([
+                fetch('https://dolarapi.com/v1/dolares/bolsa'),
+                fetch('https://dolarapi.com/v1/dolares/contadoconliqui')
+            ]);
+            if(!respMep.ok || !respCcl.ok) throw new Error('respuesta no ok');
+            const dataMep = await respMep.json();
+            const dataCcl = await respCcl.json();
+
+            const promedioMep = (dataMep.compra + dataMep.venta) / 2;
+            const promedioCcl = (dataCcl.compra + dataCcl.venta) / 2;
+
+            mep = promedioMep;
+            ccl = promedioCcl;
+            mepInput.value = promedioMep.toFixed(2);
+            cclInput.value = promedioCcl.toFixed(2);
+            state.mep = promedioMep;
+            state.ccl = promedioCcl;
+            save();
+            renderPctActual();
+
+            mepFlag.className = 'flag show ok';
+            mepFlag.textContent = 'MEP: compra $' + dataMep.compra.toFixed(2) + ' / venta $' + dataMep.venta.toFixed(2) +
+                ' (prom. $' + promedioMep.toFixed(2) + '). CCL: compra $' + dataCcl.compra.toFixed(2) + ' / venta $' + dataCcl.venta.toFixed(2) +
+                ' (prom. $' + promedioCcl.toFixed(2) + ').';
+        }catch(e){
+            mepFlag.className = 'flag show bad';
+            mepFlag.textContent = 'No se pudo obtener las cotizaciones automáticamente. Cargá los valores de MEP y CCL a mano en los campos de arriba.';
+        }
+    }
+
+    function calcularDistribucion(){
+        const sumCategorias = CATEGORIAS.reduce((s,c)=> s + (parseFloat(state[c.key].target)||0), 0);
+        const saldoTargetPct = getSaldoTargetPct();
+
+        if(incluirSaldoObjetivo.checked){
+            if(sumCategorias > 100.05){
+                resultado.innerHTML = '<p class="result-empty">Las categorías ya suman más de 100% sin contar la liquidez. Ajustalas antes de calcular.</p>';
+                return;
+            }
+        } else if(Math.abs(sumCategorias-100) > 0.5){
+            resultado.innerHTML = '<p class="result-empty">Los % objetivo deben sumar 100% antes de calcular.</p>';
+            return;
+        }
+        if(!mep || mep <= 0){
+            resultado.innerHTML = '<p class="result-empty">Cargá o actualizá la cotización del MEP antes de calcular.</p>';
+            return;
+        }
+
+        const aportePesos = parseNum(document.getElementById('aportePesos').value);
+        const aporteUsd = parseNum(document.getElementById('aporteUsd').value);
+        const aporteGenuino = aportePesos + aporteUsd * mep;
+        const saldoActualArs = getSaldoActualArs();
+        const valorCategoriasActual = getValorCategoriasArs();
+        const nuevoTotal = valorCategoriasActual + saldoActualArs + aporteGenuino;
+
+        // La liquidez entra al mismo cálculo de rebalanceo que las demás categorías:
+        // si hoy tiene más % del que corresponde, ese excedente se destina a invertir;
+        // si tiene menos, se reserva parte del aporte para llegar al % de liquidez buscado.
+        const filas = CATEGORIAS.map(c=>{
+            const s = state[c.key];
+            const valorActualArs = valorEnArs(c, s.valor);
+            const valorObjetivoArs = (parseFloat(s.target)||0)/100 * nuevoTotal;
+            const diferencia = valorObjetivoArs - valorActualArs;
+            return { key:c.key, name:c.name, currency:c.currency, valorActualArs, valorObjetivoArs,
+                comprarArs: diferencia > 0 ? diferencia : 0, venderArs: diferencia < 0 ? -diferencia : 0 };
+        });
+        const objetivoSaldoArs = saldoTargetPct/100 * nuevoTotal;
+        const diferenciaSaldo = objetivoSaldoArs - saldoActualArs;
+        filas.push({ key:'saldo', name:'Liquidez / Saldo', currency:'ARS', valorActualArs: saldoActualArs, valorObjetivoArs: objetivoSaldoArs,
+            comprarArs: diferenciaSaldo > 0 ? diferenciaSaldo : 0, venderArs: diferenciaSaldo < 0 ? -diferenciaSaldo : 0 });
+
+        let html = '<div class="table-container"><table><thead><tr>';
+        html += '<th>Categoría</th><th class="num">Valor actual</th><th class="num">Valor objetivo</th>';
+        html += '<th class="num">Comprar</th><th class="num">Vender</th>';
+        html += '</tr></thead><tbody>';
+
+        let totalComprar = 0, totalVender = 0;
+        filas.forEach(f=>{
+            totalComprar += f.comprarArs; totalVender += f.venderArs;
+            const esSaldo = f.key === 'saldo';
+            const badge = f.comprarArs > 0.5
+                ? '<span class="badge under">'+(esSaldo ? 'reservar para llegar al objetivo' : 'por debajo del objetivo')+'</span>'
+                : (f.venderArs > 0.5 ? '<span class="badge over">'+(esSaldo ? 'excedente para invertir' : 'por encima del objetivo')+'</span>' : '');
+
+            let comprarTxt = '—';
+            if(f.comprarArs > 0.5){
+                comprarTxt = '$ ' + fmtMoney(f.comprarArs);
+                if(f.currency === 'USD') comprarTxt += ' <span style="color:#64748b;font-weight:400;">(u$s ' + fmtMoney(f.comprarArs/mep) + ')</span>';
+            }
+            let venderTxt = '—';
+            if(f.venderArs > 0.5){
+                venderTxt = '$ ' + fmtMoney(f.venderArs);
+                if(f.currency === 'USD') venderTxt += ' <span style="color:#64748b;font-weight:400;">(u$s ' + fmtMoney(f.venderArs/mep) + ')</span>';
+            }
+
+            html += '<tr>';
+            html += '<td class="ticker">'+f.name+(badge ? '<br>'+badge : '')+'</td>';
+            html += '<td class="num">$ '+fmtMoney(f.valorActualArs)+(f.currency==='USD' ? ' <span style="color:#64748b;font-weight:400;">(u$s '+fmtMoney(f.valorActualArs/mep)+')</span>' : '')+'</td>';
+            html += '<td class="num">$ '+fmtMoney(f.valorObjetivoArs)+(f.currency==='USD' ? ' <span style="color:#64748b;font-weight:400;">(u$s '+fmtMoney(f.valorObjetivoArs/mep)+')</span>' : '')+'</td>';
+            html += '<td class="num">'+comprarTxt+'</td>';
+            html += '<td class="num">'+venderTxt+'</td>';
+            html += '</tr>';
+        });
+
+        html += '</tbody><tfoot><tr>';
+        html += '<td>Total</td><td class="num">$ '+fmtMoney(valorCategoriasActual+saldoActualArs)+'</td><td class="num">$ '+fmtMoney(nuevoTotal)+'</td>';
+        html += '<td class="num">$ '+fmtMoney(totalComprar)+'</td><td class="num">$ '+fmtMoney(totalVender)+'</td>';
+        html += '</tr></tfoot></table></div>';
+
+        html += '<p class="section-sub" style="margin-top:10px;">En la fila "Liquidez / Saldo": <b>Comprar</b> significa reservar ese monto sin invertir (para llegar al % de liquidez buscado), y <b>Vender</b> significa que ese monto sale de la caja y se suma a lo que se invierte en las demás categorías.</p>';
+
+        if(totalVender > 0.5){
+            html += '<p class="section-sub" style="margin-top:6px;">Con el aporte nuevo no alcanza para equilibrar todo comprando: además hace falta destinar $ '+fmtMoney(totalVender)+
+                ' desde las categorías (o la liquidez) que están pasadas de objetivo. Sumado a lo demás, la cartera queda exactamente balanceada.</p>';
+        } else {
+            html += '<p class="section-sub" style="margin-top:6px;">Alcanza con comprar: no hace falta vender ni liberar nada.</p>';
+        }
+
+        resultado.innerHTML = html;
+    }
+
+    mepInput.addEventListener('input', ()=>{
+        mep = parseFloat(mepInput.value) || 0;
+        state.mep = mep;
+        save();
+        renderPctActual();
+    });
+
+    cclInput.addEventListener('input', ()=>{
+        ccl = parseFloat(cclInput.value) || 0;
+        state.ccl = ccl;
+        save();
+        renderPctActual();
+    });
+
+    attachMoneyInput(saldoArsInput, (n)=>{
+        state.saldoArs = n;
+        save();
+        renderPctActual();
+    });
+
+    attachMoneyInput(saldoUsdInput, (n)=>{
+        state.saldoUsd = n;
+        save();
+        renderPctActual();
+    });
+
+    attachMoneyInput(saldoUsdCclInput, (n)=>{
+        state.saldoUsdCcl = n;
+        save();
+        renderPctActual();
+    });
+
+    incluirSaldoObjetivo.addEventListener('change', ()=>{
+        state.incluirSaldoObjetivo = incluirSaldoObjetivo.checked;
+        checkPctFlag();
+        save();
+    });
+
+    document.getElementById('heroMoneda').addEventListener('change', ()=>{
+        updateHero(getPatrimonioActualArs());
+    });
+
+    document.getElementById('btnCotizacion').addEventListener('click', actualizarCotizacion);
+    attachMoneyInput(document.getElementById('aportePesos'), ()=>{});
+    attachMoneyInput(document.getElementById('aporteUsd'), ()=>{});
+
+    document.getElementById('calcBtn').addEventListener('click', calcularDistribucion);
+
+    document.getElementById('btnGuardar').addEventListener('click', ()=>{
+        save();
+        const msg = document.getElementById('guardarMsg');
+        msg.textContent = 'Guardado en este navegador ✓';
+        setTimeout(()=>{ if(msg.textContent === 'Guardado en este navegador ✓') msg.textContent = ''; }, 2500);
+    });
+
+    document.getElementById('btnReset').addEventListener('click', ()=>{
+        if(!confirm('¿Reiniciar todos los valores a los de por defecto? Se pierde lo cargado en este navegador.')) return;
+        state = defaultState();
+        mep = 0; ccl = 0;
+        mepInput.value = ''; cclInput.value = '';
+        saldoArsInput.value = ''; saldoUsdInput.value = ''; saldoUsdCclInput.value = '';
+        document.getElementById('aportePesos').value = '';
+        document.getElementById('aporteUsd').value = '';
+        document.getElementById('heroMoneda').value = 'ARS';
+        incluirSaldoObjetivo.checked = true;
+        resultado.innerHTML = '';
+        save();
+        renderRows();
+    });
+
+    // Al presionar Enter en un campo, pasa el foco al siguiente campo de la página.
+    document.addEventListener('keydown', function(e){
+        if(e.key !== 'Enter') return;
+        if(e.target.tagName !== 'INPUT') return;
+        e.preventDefault();
+        const focusables = Array.from(document.querySelectorAll('input, button'))
+            .filter(el => !el.disabled && el.offsetParent !== null);
+        const idx = focusables.indexOf(e.target);
+        if(idx > -1 && idx < focusables.length - 1){
+            const next = focusables[idx+1];
+            next.focus();
+            if(typeof next.select === 'function') next.select();
+        }
+    });
+
+    // init
+    state = load() || defaultState();
+    mep = parseFloat(state.mep) || 0;
+    ccl = parseFloat(state.ccl) || 0;
+    if(mep) mepInput.value = mep;
+    if(ccl) cclInput.value = ccl;
+    if(state.saldoArs) saldoArsInput.value = formatNum(parseNum(state.saldoArs));
+    if(state.saldoUsd) saldoUsdInput.value = formatNum(parseNum(state.saldoUsd));
+    if(state.saldoUsdCcl) saldoUsdCclInput.value = formatNum(parseNum(state.saldoUsdCcl));
+    if(state.incluirSaldoObjetivo === false) incluirSaldoObjetivo.checked = false;
+    initCharts();
+    renderRows();
+})();
+</script>
+</body>
+</html>
